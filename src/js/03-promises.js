@@ -7,7 +7,7 @@ import "notiflix/dist/notiflix-3.2.6.min.css"
 const form = document.querySelector('.form');
 
 // оголошуємо змінні для запису значень введених в input
-let ut = null;
+let delayInput = null;
 let stepInput = null;
 let amountInput = null;
 
