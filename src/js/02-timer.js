@@ -18,7 +18,7 @@ const refs = {
     secondsSpan: document.querySelector('span[data-seconds]'),
 };
 
-// робимо кнопку Start не активною
+// робимо кнопку Start не активною до початку відліку
 refs.start_btn.setAttribute('disabled', 'true');
 
 // налаштування та ініціалізація бібліотеки flatpickr
@@ -46,46 +46,45 @@ flatpickr("#datetime-picker", options);
 
 
 // функціонал таймера
-const timer = {
-    // запускає таймер
-    start() {
-        const startTime = startDate;
+const showTimer = () => {  
+    const startTime = startDate;
 
-        intervalID = setInterval(() => {
-            const currentTime = Date.now();
-            const deltaTime = startTime - currentTime;
-            const { days, hours, minutes, seconds } = convertMs(deltaTime);
+    const intervalID = setInterval(() => {
+        const currentTime = Date.now();
+        const deltaTime = startTime - currentTime;
+        const { days, hours, minutes, seconds } = convertMs(deltaTime);
 
-            updateFaceTimer({ days, hours, minutes, seconds });
+        updateFaceTimer({ days, hours, minutes, seconds });
+        
+        // робимо кнопку Start не активною після запуску таймера
+        refs.start_btn.setAttribute('disabled', 'true');
 
-            // перевірка для зупинки таймера
-            if (
+        // перевірка для зупинки таймера
+        if (
             refs.daysSpan.textContent === '0' &&
             refs.hoursSpan.textContent === '00' &&
             refs.minutesSpan.textContent === '00' &&
             refs.secondsSpan.textContent === '00'
-          ) {
+        ) {
             clearInterval(intervalID);
-          }
-        }, 1000)
-    },
-
+        }
+    }, 1000);
     
 };
 
-//Принимает число, приводит к строке и добавляет в начало 0 если число меньше 2-х знаков
+//Приймає число, приводить до рядку та додає 0 якщо число меньше 2-х символів
 const addLeadingZero = value => String(value).padStart(2, '0');
 
 // оновлює інтерфейс таймеру
 function updateFaceTimer({ days, hours, minutes, seconds }) {
     refs.daysSpan.textContent = days;
-    refs.hoursSpan.textContent = `${hours}`;
-    refs.minutesSpan.textContent = `${minutes}`;
-    refs.secondsSpan.textContent = `${seconds}`;
+    refs.hoursSpan.textContent = addLeadingZero(hours);
+    refs.minutesSpan.textContent = addLeadingZero(minutes);
+    refs.secondsSpan.textContent = addLeadingZero(seconds);
 };
 
 
-
+// підрахунок значень кінцевою і поточною датою в мілісекундах.
 function convertMs(ms) {
   // Number of milliseconds per unit of time
   const second = 1000;
@@ -96,13 +95,13 @@ function convertMs(ms) {
   // Remaining days
   const days = Math.floor(ms / day);
   // Remaining hours
-  const hours = addLeadingZero(Math.floor((ms % day) / hour));
+  const hours = Math.floor((ms % day) / hour);
   // Remaining minutes
-  const minutes = addLeadingZero(Math.floor(((ms % day) % hour) / minute));
+  const minutes = Math.floor(((ms % day) % hour) / minute);
   // Remaining seconds
-  const seconds = addLeadingZero(Math.floor((((ms % day) % hour) % minute) / second));
+  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
 
   return { days, hours, minutes, seconds };
 }
 
-refs.start_btn.addEventListener('click', timer.start);
+refs.start_btn.addEventListener('click', showTimer);
